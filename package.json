@@ -1,0 +1,22 @@
+{
+  "name": "google-sheets-parce",
+  "version": "1.0.0",
+  "description": "try to parce google sheets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gico735/google-sheets-parce.git"
+  },
+  "author": "Gregory Zdanovich",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gico735/google-sheets-parce/issues"
+  },
+  "homepage": "https://github.com/Gico735/google-sheets-parce#readme",
+  "dependencies": {
+    "googleapis": "^27.0.0"
+  }
+}
