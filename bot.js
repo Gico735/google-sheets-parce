@@ -14,5 +14,11 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   console.log(msg)
-  bot.sendMessage(chatId, 'Received your message');
+  bot.sendMessage(chatId, 'Я тебя услышал');
 });
+
+const sendMsgToManager = (bot) => (msg) => {
+  bot.sendMessage(215633400, msg)
+}
+
+module.exports = {sendMsgToManager : sendMsgToManager(bot)}
