@@ -4,6 +4,8 @@
   "description": "try to parce google sheets",
   "main": "index.js",
   "scripts": {
+    "sheet": "node sheet.js",
+    "bot": "node bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +19,10 @@
   },
   "homepage": "https://github.com/Gico735/google-sheets-parce#readme",
   "dependencies": {
-    "googleapis": "^27.0.0"
+    "googleapis": "^27.0.0",
+    "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5",
+    "socks5-http-client": "^1.0.4"
   }
 }
