@@ -192,23 +192,22 @@ export const configureMsg = () => {
 export async function configureMsgForOne(user) {
   await getUserIds()
   // arrProjects['Корчкова А.'].projects = []
-  console.log('go send this', user)
   Object.keys(arrProjects).map(manager => {
-    console.log(arrProjects[manager].chatId, '===', user.chatId, arrProjects[manager].chatId === user.chatId)
     if (+arrProjects[manager].chatId === +user.chatId) {
-      console.log('ye this snowy', manager)
       const managerArr = arrProjects[manager].projects
-      let message = `Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов: \nАктуализируй сметы, иначе в реестре будут некорректные данные:`
+      let message = `Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов: \n
+      Актуализируй сметы, иначе в реестре будут некорректные данные:`
       if (managerArr.length) {
-        const empty = managerArr.map(project => {
+        let empty = managerArr.map(project => {
           if (project.estimate === 'Нет')
             return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
         }).join('')
-        message += 'А у этих проектов тебе нужно актуализировать % завершенности:'
+        message += 'У этих проектов тебе нужно актуализировать % завершенности:'
         managerArr.map(project => {
           if (project.complete === 'Нет')
             return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
         })
+        if (manager === 'Корчкова А.') console.log(11111, manager, empty)
         bot.sendMessage(user.chatId, message)
       } else {
         bot.sendMessage(user.chatId, `Привет! ${manager} Это Onibot, пишу тебе, чтобы сказать, что ты молодец\nвсе твои проекты оформлены правильно!`)
@@ -232,7 +231,11 @@ const parseDataProject = (rows) => {
         const project = {}
         project.name = row[5]
         project.client = row[4]
-        project.estimate = row[8]
+        if (row[3] === 'Корчкова А.') {
+          project.estimate = 'Да'
+        } else {
+          project.estimate = row[8]
+        }
         project.complete = row[14]
         project.link1 = row[0]
         project.link2 = row[1]
