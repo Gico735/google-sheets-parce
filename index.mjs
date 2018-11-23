@@ -1,22 +1,13 @@
-import { bot, getMsg, getMsgWrapper } from './bot.mjs'
-import { auth, writeUserToSheet, getProjectInfo, getUserIds } from './sheet.mjs'
-import { AssertionError } from 'assert';
-// async function init() {
-// try {
-// const outRes = await auth()
+import { bot, getMsg, helloMsg } from './bot.mjs'
+import { auth, checkUser, getProjectInfo, getUserIds, configureMsgForOne } from './sheet.mjs'
+
 auth()
+
 setTimeout(() => {
   getProjectInfo()
   getUserIds()
 }, 300);
-// await console.log(outRes)
-bot.onText(/\/start/, getMsg([console.log, writeUserToSheet]))
-    // await bot.onText(/\/get/, getMsg([console.log, writeUserToSheet]))
 
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
 
-// init()
-
+bot.onText(/\/start/, getMsg([checkUser]))
+bot.onText(/\/project/, getMsg([configureMsgForOne]))

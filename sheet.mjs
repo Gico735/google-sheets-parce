@@ -2,14 +2,10 @@ import fs from 'fs';
 import readline from 'readline';
 import googleapis from 'googleapis';
 const google = googleapis.google
-import { getMsg, sendMsgToManager, bot } from './bot.mjs'
-import { encode } from 'punycode';
-import { resolve } from 'url';
-
+import { bot } from './bot.mjs'
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 const TOKEN_PATH = 'token.json';
-
 
 let sheets
 
@@ -19,22 +15,6 @@ export function auth() {
     authorize(JSON.parse(content), saveSheets);
   });
 }
-
-// export function auth() {
-//   // return new Promise((resolve, reject) => {
-//   fs.readFile('credentials.json', (err, content) => {
-//     if (err) console.log('Error loading client secret file: ' + err);
-//     // Authorize a client with credentials, then call the Google Sheets API.
-//     authorize(JSON.parse(content), saveSheets
-//       // (result, error) => {
-//       //   if (error) console.log('Error loading client secret file: ' + error);
-//       //   return sheets = google.sheets({ version: 'v4', result })
-//       //   // resolve(sheets = google.sheets({ version: 'v4', result }))
-//       // }
-//     );
-//   });
-//   // })
-// }
 
 function authorize(credentials, callback) {
   const { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -49,12 +29,6 @@ function authorize(credentials, callback) {
   });
 }
 
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback for the authorized client.
- */
 function getNewToken(oAuth2Client, callback) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -80,36 +54,14 @@ function getNewToken(oAuth2Client, callback) {
   });
 }
 
-const getIdManager = (sheets) => {
-  sheets.spreadsheets.values.get({
-    spreadsheetId: '1HsqTX1yflmDKHQ5zBY8YauqORh9ycFxcdtylin8Injc',
-    range: '!A2:N',
-  }, (err, res) => {
-    console.log(i)
-    ++i
-    if (err) return console.log('The API.getIdManager returned an error: ' + err);
-    const rows = res.data.values;
-    if (rows.length) {
-      // parseDataManagers(rows)
-      // console.log(rows.length)
-    } else {
-      console.log('getIdManager:No data found.');
-    }
-  });
-}
 
 function saveSheets(auth) {
   sheets = google.sheets({ version: 'v4', auth });
-  // getNewUser((user) => { console.log(user) })
-  // writeUserToSheet()
-  // getIdManager(sheets)
-  // getProjectInfo(sheets)
 }
 
 
 
 export const getProjectInfo = () => {
-  // return new Promise((resolve, reject) => {
   sheets.spreadsheets.values.get({
     spreadsheetId: '1dX2Y1YuLrcV411fPhaWV5lyAclmrM4HlOtVlxYVzUtE',
     range: 'Projects!A2:O',
@@ -122,7 +74,6 @@ export const getProjectInfo = () => {
       console.log('getProjectInfo:No data found.');
     }
   });
-  // })
 }
 
 export const getUserIds = () => {
@@ -143,13 +94,25 @@ export const getUserIds = () => {
           arrProjects[row[3]].projects = []
         }
       })
-      // console.log(arrProjects)
     } else {
       console.log('getUserIds:No data found.');
     }
   });
 }
 
+export  function checkUser(user) {
+  getUserIds()
+  let oldUser = false
+  Object.keys(arrProjects).forEach(manager => {
+    if (+arrProjects[manager].chatId === +user.chatId) {
+      oldUser = true
+      return bot.sendMessage(user.chatId, 'Cтопе, Я тебя знаю ' + manager)
+    }
+  })
+  if (!oldUser) {
+    return writeUserToSheet(user)
+  }
+}
 
 export async function writeUserToSheet(user) {
   // const sheets = google.sheets({ version: 'v4', AUTH });
@@ -163,23 +126,22 @@ export async function writeUserToSheet(user) {
       ],
     }
   })
-  return res;
+  console.log('writeUserToSheet::', user)
+  return bot.sendMessage(user.chatId, 'Я тебя запомнил, после подтверждения твоего аккаунта Ты сможешь получать информацию по проектам')
 }
 
-const configureMsg = (arrProjects) => {
+
+export const configureMsg = () => {
   Object.keys(arrProjects).map(manager => {
-    if (arrProjects[manager].chatId) {
+    if (arrProjects[manager].chatId !== undefined) {
       const chatId = arrProjects[manager].chatId
       const managerArr = arrProjects[manager].projects
       let message = `Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов: \n\nАктуализируй сметы, иначе в реестре будут некорректные данные:`
       if (managerArr) {
-        // console.log(managerArr.length)
         managerArr.map(project => {
-          console.log(project)
           if (project.estimate === 'Нет')
             return message += `\n☀ ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
         })
-        // bot.sendMessage(chatId, message)
         message += 'А у этих проектов тебе нужно актуализировать % завершенности:'
         managerArr.map(project => {
           if (project.complete === 'Нет')
@@ -191,11 +153,34 @@ const configureMsg = (arrProjects) => {
   })
 }
 
-
+export async function configureMsgForOne(user) {
+  await getUserIds()
+  console.log('go send this mudila', user)
+  Object.keys(arrProjects).map(manager => {
+    console.log(arrProjects[manager].chatId, '===', user.chatId, arrProjects[manager].chatId === user.chatId)
+    if (+arrProjects[manager].chatId === +user.chatId) {
+      console.log('ye this snowy', manager)
+      const managerArr = arrProjects[manager].projects
+      let message = `Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов: \n\nАктуализируй сметы, иначе в реестре будут некорректные данные:`
+      if (managerArr) {
+        managerArr.map(project => {
+          if (project.estimate === 'Нет')
+            return message += `\n☀ ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+        })
+        message += 'А у этих проектов тебе нужно актуализировать % завершенности:'
+        managerArr.map(project => {
+          if (project.complete === 'Нет')
+            return message += `\n☀ ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
+        })
+        bot.sendMessage(user.chatId, message)
+      }
+    }
+  })
+}
 
 const arrProjects = {}
 const parseDataProject = (rows) => {
-  console.log('look on all info:')
+  console.log('look on all project:')
   rows.forEach((row, i) => {
     if (row[3] === '#N/A' || row[4] === '') return
 
@@ -213,13 +198,10 @@ const parseDataProject = (rows) => {
         project.link1 = row[0]
         project.link2 = row[1]
 
-        // console.log(arrProjects)
-        // fs.writeFileSync('./test.json', JSON.stringify(arrProjects))
         return arrProjects[row[3]].projects.push(project)
       }
     }
   })
   console.log('I am all')
   // fs.writeFileSync('./test.json', JSON.stringify(arrProjects))
-  configureMsg(arrProjects)
 }
