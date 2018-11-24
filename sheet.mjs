@@ -200,7 +200,6 @@ const setEstimateProjectMessage = (managerArr) => {
       }
       messagePart2 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
     }
-    console.log(2000000000, messagePart2)
   })
   return messagePart2
 }
