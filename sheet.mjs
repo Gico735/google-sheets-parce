@@ -189,26 +189,61 @@ export const configureMsg = () => {
   })
 }
 
+const setEstimateProjectMessage = (managerArr) => {
+  let emptyPart1 = true
+  let messagePart2 = ''
+  managerArr.forEach(project => {
+    if (project.estimate === 'Нет') {
+      if (emptyPart1) {
+        messagePart2 = '   Актуализируй сметы, иначе в реестре будут некорректные данные:\n'
+        emptyPart1 = false
+      }
+      messagePart2 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+    }
+    console.log(2000000000, messagePart2)
+  })
+  return messagePart2
+}
+
+const setCompleteProjectMessage = (managerArr) => {
+  let emptyPart2 = true
+  let messagePart3 = ''
+  managerArr.forEach(project => {
+    if (project.complete === 'Нет') {
+      if (emptyPart2) {
+        messagePart3 = '   У этих проектов тебе нужно актуализировать % завершенности:\n'
+        emptyPart2 = false
+      }
+      messagePart3 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+    }
+  })
+
+  return messagePart3
+}
+
+
+
 export async function configureMsgForOne(user) {
   await getUserIds()
   // arrProjects['Корчкова А.'].projects = []
   Object.keys(arrProjects).map(manager => {
     if (+arrProjects[manager].chatId === +user.chatId) {
       const managerArr = arrProjects[manager].projects
-      let message = `Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов: \n
-      Актуализируй сметы, иначе в реестре будут некорректные данные:`
+      const messagePart1 = `   Привет! ${manager} Это Onibot, пишу тебе, чтобы напомнить о том, что тебе нужно навести порядок в файлах своих проектов:\n\n`
       if (managerArr.length) {
-        let empty = managerArr.map(project => {
-          if (project.estimate === 'Нет')
-            return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
-        }).join('')
-        message += 'У этих проектов тебе нужно актуализировать % завершенности:'
-        managerArr.map(project => {
-          if (project.complete === 'Нет')
-            return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
-        })
-        if (manager === 'Корчкова А.') console.log(11111, manager, empty)
-        bot.sendMessage(user.chatId, message)
+        // let empty = managerArr.map(project => {
+        //   if (project.estimate === 'Нет')
+        //     return message1 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+        // }).join('')
+        const messagePart2 = setEstimateProjectMessage(managerArr)
+        // message += 'У этих проектов тебе нужно актуализировать % завершенности:'
+        // managerArr.map(project => {
+        //   if (project.complete === 'Нет')
+        //     return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
+        // })
+
+        const messagePart3 = setCompleteProjectMessage(managerArr)
+        bot.sendMessage(user.chatId, `${messagePart1}${messagePart2}${messagePart3}`)
       } else {
         bot.sendMessage(user.chatId, `Привет! ${manager} Это Onibot, пишу тебе, чтобы сказать, что ты молодец\nвсе твои проекты оформлены правильно!`)
       }
@@ -231,11 +266,7 @@ const parseDataProject = (rows) => {
         const project = {}
         project.name = row[5]
         project.client = row[4]
-        if (row[3] === 'Корчкова А.') {
-          project.estimate = 'Да'
-        } else {
-          project.estimate = row[8]
-        }
+        project.estimate = row[8]
         project.complete = row[14]
         project.link1 = row[0]
         project.link2 = row[1]
