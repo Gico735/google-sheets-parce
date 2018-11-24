@@ -189,42 +189,66 @@ export const configureMsg = () => {
   })
 }
 
-const setEstimateProjectMessage = (managerArr) => {
-  let emptyPart1 = true
-  let messagePart2 = ''
+// const setEstimateProjectMessage = (managerArr) => {
+//   let emptyPart1 = true
+//   let messagePart2 = ''
+//   managerArr.forEach(project => {
+//     if (project.estimate === 'Нет') {
+//       if (emptyPart1) {
+//         messagePart2 = '   Актуализируй сметы, иначе в реестре будут некорректные данные:\n'
+//         emptyPart1 = false
+//       }
+//       messagePart2 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+//     }
+//   })
+//   return messagePart2
+// }
+
+// const setCompleteProjectMessage = (managerArr) => {
+//   let emptyPart2 = true
+//   let messagePart3 = ''
+//   managerArr.forEach(project => {
+//     if (project.complete === 'Нет') {
+//       if (emptyPart2) {
+//         messagePart3 = '   У этих проектов тебе нужно актуализировать % завершенности:\n'
+//         emptyPart2 = false
+//       }
+//       messagePart3 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+//     }
+//   })
+
+//   return messagePart3
+// }
+
+const setPartProjectMessage = (managerArr, part) => {
+  let empty = true
+  let message = ''
   managerArr.forEach(project => {
-    if (project.estimate === 'Нет') {
-      if (emptyPart1) {
-        messagePart2 = '   Актуализируй сметы, иначе в реестре будут некорректные данные:\n'
-        emptyPart1 = false
+    if (part === 2) {
+      if (project.estimate === 'Нет') {
+        if (empty) {
+          message = '   Актуализируй сметы, иначе в реестре будут некорректные данные:\n'
+          empty = false
+        }
+        message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
       }
-      messagePart2 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+    } else {
+      if (project.complete === 'Нет') {
+        if (empty) {
+          message = '   У этих проектов тебе нужно актуализировать % завершенности:\n'
+          empty = false
+        }
+        message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+      }
     }
   })
-  return messagePart2
-}
-
-const setCompleteProjectMessage = (managerArr) => {
-  let emptyPart2 = true
-  let messagePart3 = ''
-  managerArr.forEach(project => {
-    if (project.complete === 'Нет') {
-      if (emptyPart2) {
-        messagePart3 = '   У этих проектов тебе нужно актуализировать % завершенности:\n'
-        emptyPart2 = false
-      }
-      messagePart3 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
-    }
-  })
-
-  return messagePart3
+  return message
 }
 
 
 
 export async function configureMsgForOne(user) {
   await getUserIds()
-  // arrProjects['Корчкова А.'].projects = []
   Object.keys(arrProjects).map(manager => {
     if (+arrProjects[manager].chatId === +user.chatId) {
       const managerArr = arrProjects[manager].projects
@@ -234,14 +258,14 @@ export async function configureMsgForOne(user) {
         //   if (project.estimate === 'Нет')
         //     return message1 += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
         // }).join('')
-        const messagePart2 = setEstimateProjectMessage(managerArr)
+        const messagePart2 = setPartProjectMessage(managerArr, 2)
         // message += 'У этих проектов тебе нужно актуализировать % завершенности:'
         // managerArr.map(project => {
         //   if (project.complete === 'Нет')
         //     return message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
         // })
 
-        const messagePart3 = setCompleteProjectMessage(managerArr)
+        const messagePart3 = setPartProjectMessage(managerArr, 3)
         bot.sendMessage(user.chatId, `${messagePart1}${messagePart2}${messagePart3}`)
       } else {
         bot.sendMessage(user.chatId, `Привет! ${manager} Это Onibot, пишу тебе, чтобы сказать, что ты молодец\nвсе твои проекты оформлены правильно!`)
