@@ -12,6 +12,13 @@ setTimeout(() => {
 //   giveArrOfSheets()
 // }, 300);
 
+setInterval(() => {
+  const time = new Date()
+  if (time.getDay() === 2 && (time.getHours() >= 11 && time.getHours() <= 12)) {
+    console.log('lets go send msgs')
+  }
+}, 5000);
+
 
 bot.onText(/\/start/, getMsg([checkUser]))
 bot.onText(/\/project/, getMsg([configureMsgForOne]))

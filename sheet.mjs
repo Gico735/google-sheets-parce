@@ -238,7 +238,7 @@ const setPartProjectMessage = (managerArr, part) => {
           message = '   У этих проектов тебе нужно актуализировать % завершенности:\n'
           empty = false
         }
-        message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link1} \n\n`
+        message += `\n🔥 ${project.client} ${project.name}, вот ссылка на карточку ${project.link2} \n\n`
       }
     }
   })
@@ -278,10 +278,10 @@ const arrProjects = {}
 const parseDataProject = (rows) => {
   console.log('look on all project:')
   rows.forEach((row, i) => {
-    if (row[3] === '#N/A' || row[4] === '') return
+    if (row[3] === '#N/A' || row[4] === '' || row[4] === '#N/A') return
 
     if (row[2].toLowerCase() === 'нет' || row[2] === '') {
-      if (row[8].toLowerCase() === 'нет' || row[14].toLowerCase() === 'нет') {
+      if (row[8].toLowerCase() === 'нет' || row[11].toLowerCase() === 'нет') {
         if (!arrProjects[row[3]]) {
           arrProjects[row[3]] = {}
           arrProjects[row[3]].projects = []
@@ -290,7 +290,7 @@ const parseDataProject = (rows) => {
         project.name = row[5]
         project.client = row[4]
         project.estimate = row[8]
-        project.complete = row[14]
+        project.complete = row[11]
         project.link1 = row[0]
         project.link2 = row[1]
 
